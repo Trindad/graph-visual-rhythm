@@ -172,22 +172,28 @@ def preparing_data(measure):
     x = []
     y = []
     
-    global startTime, endTime
+    
     # end = float(endTime.get())*1000.*60.*60.*60.
     # start = float(startTime.get())*1000.*60.*60.*60.
-    start = 3600000.
-    end = 9000000.
-    # print(start, " ", end)
-    # time = 9000000./1000./60.
+    # start = 3600000.
+    # end = 9000000.
 
     # mon, sec = divmod(time, 60.)
     # hr, mon = divmod(mon, 60.)
     # print(hr, mon, sec)  # "%d:%02d:%02d" %
+    global startTime, endTime
     global vehicles
     global interval
     global timeVeh
     vehicles = []
     timeVeh = []
+
+    start = float(startTime.get())*1000.*60.* 60.
+    end = float(endTime.get())*1000.*60.*60.
+
+    print(start, " ", end, " ", interval)
+    # time = 9000000./1000./60.
+
     for row in c.execute("select cast(time as integer) as time,"+measure+" from graphs where time between "+str(start)+" and "+str(end)):
         time = row[0]
         veh = 0
@@ -213,7 +219,7 @@ def obtainMeasure():
     if int(endTime.get()) < int(startTime.get()): 
         errorMessage.showerror("Error", "Start time must be before the end time")
     elif (int(interval.get())/60.) >= int(endTime.get()) or (int(interval.get())/60.) >= int(startTime.get()):
-         errorMessage.showerror("Error", "Interval must be lower than start/end time")
+        errorMessage.showerror("Error", "Interval must be lower than start/end time")
     else:
         global canvas
         canvas.delete("all")
@@ -266,8 +272,8 @@ def window_frame():
     global currentMeasure
     currentMeasure = Combobox(window)
     currentMeasure['values'] = (
-        "degree", "closeness", "betweeness", "pagerank", "harmonic", "local efficiency", "global efficiency", "maximal matching")
-    currentMeasure.current(1)
+        "degree centrality", "closeness centrality", "betweenness centrality", "pagerank", "harmonic centrality", "local efficiency", "global efficiency", "maximal matching")
+    currentMeasure.current(0)
     currentMeasure.place(bordermode=OUTSIDE, height=30, width=200, x=30, y=130)
 
     var3 = StringVar()
@@ -288,8 +294,8 @@ def window_frame():
 
     global startTime  # hours
     startTime = Combobox(window)
-    startTime['values'] = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-                "13", "14", "15", "16", "18", "19", "20", "21", "22", "23", "24")
+    startTime['values'] = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+                "13", "14", "15", "16", "18", "19", "20", "21", "22", "23")
     startTime.current(1)
     startTime.place(bordermode=OUTSIDE, height=30, width=200, x=30, y=270)
 
@@ -300,8 +306,8 @@ def window_frame():
 
     global endTime #hours
     endTime = Combobox(window)
-    endTime['values'] = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
-                    "12", "13", "14", "15", "16", "18", "19", "20", "21", "22", "23", "24")
+    endTime['values'] = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+                    "12", "13", "14", "15", "16", "18", "19", "20", "21", "22", "23")
     endTime.current(5)
     endTime.place(bordermode=OUTSIDE, height=30, width=200, x=30, y=340)
 
