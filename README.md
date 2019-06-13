@@ -2,7 +2,7 @@
 
 ### Dependencies:
 
-Before the execution, you need to check these following dependencies: SUMO, python, python3, networkx, and matplotlib.
+Before the execution, you need to check these following dependencies: SUMO 1.2, python, python3, networkx, and matplotlib.
 
 
 ### Dataset:
@@ -11,7 +11,7 @@ TAPAS Cologne is used that is available to download in http://kolntrace.project.
 
 ### Generating graphs:
 
-python <cologne6to8>.sumocfg <tripinfo>.xml
+python runner.py <cologne6to8>.sumocfg <tripinfo>.xml
 
 ### Complex measures:
 
@@ -20,10 +20,3 @@ python graph.py
 ### Interface:
 
 python3 interface.py
-
-
-Author: Silvana Trindade
-
-Discipline: MO809
-
-Year: 2019
