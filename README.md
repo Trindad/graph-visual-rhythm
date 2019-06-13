@@ -7,7 +7,8 @@ Before the execution, you need to check these following dependencies: SUMO 1.2, 
 
 ### Dataset:
 
-TAPAS Cologne is used that is available to download in http://kolntrace.project.citi-lab.fr/ 
+TAPAS Cologne is used.
+You can download it in this link http://kolntrace.project.citi-lab.fr/ 
 
 ### Generating graphs:
 
