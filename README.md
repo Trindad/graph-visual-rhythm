@@ -10,11 +10,11 @@ Before the execution, you need to check these following dependencies: SUMO 1.2, 
 TAPAS Cologne is used.
 You can download it in this link http://kolntrace.project.citi-lab.fr/ 
 
-### Generating graphs:
+### Colecting data:
 
 python runner.py <cologne6to8>.sumocfg <tripinfo>.xml
 
-### Complex measures:
+### Complex network measures:
 
 python graph.py
 
