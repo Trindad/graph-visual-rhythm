@@ -36,6 +36,10 @@ import numpy as np
 from tkinter import *
 from tkinter.ttk import *
 
+import pandas as pd
+import seaborn as sns
+# plt.style.use('seaborn')
+
 canvas = None
 canvasVehicles = None
 canvasMean = None
@@ -51,6 +55,11 @@ vehicles = None
 timeVeh = None
 mean = None
 maxMeasure = None
+
+fig_photo_scat = None
+canvasScatterPlot = None
+canvasLog = None
+fig_photo_log = None
 
 from ast import literal_eval
 
@@ -111,14 +120,24 @@ def draw_figure(canvas, figure, loc=(0, 0)):
     return photo
 
 def density_plot(mydata, measure):
-    
+
+
     if mydata == None:
         return None
     global color
+
+    global startTime, endTime
+    global interval
+
+    start = float(startTime.get())*60.
+    end = float(endTime.get())*60.
+
+    bins = (end - start)/(float(interval.get()))
     
     fig = plt.figure(1)
-    plt.hist2d(mydata[0], mydata[1], cmap=get_color(color.get()),
-               weights=np.zeros_like(mydata[1]) + 1. / mydata[1].size)
+
+    plt.hist2d(mydata[0], mydata[1], cmap=get_color(color.get()), 
+               weights=(np.zeros_like(mydata[1]) + 1.) / mydata[1].size, bins=bins)
     
     plt.xlabel('time (h)')
     if "pagerank" not in measure:
@@ -126,69 +145,119 @@ def density_plot(mydata, measure):
     else:
         plt.ylabel(measure)
     # plt.title('Relative histogram')
+    plt.grid(True)
     plt.colorbar()
+
+    hexbin(mydata,measure)
 
     # Keep this handle alive, or else figure will disappear
     global fig_photo
     global timeVeh
     global canvas
-    fig_x, fig_y = 30, 0
+    fig_x, fig_y = 50, 0
     fig_photo = draw_figure(canvas, fig, loc=(fig_x, fig_y))
     fig_w, fig_h = fig_photo.width(), fig_photo.height()
 
     #mean measure
     fig2 = plt.figure(3)
-    plt.bar(timeVeh, mean,  width=0.1,  color=['red'])
+    plt.stem(timeVeh, mean,  use_line_collection=True)
 
     plt.xlabel('time (h)')
     plt.ylabel("Mean "+measure)
-    # plt_mean.grid(True)
+    plt.grid(True)
 
     global fig_photo_mean
     global canvasMean
-    fig_x, fig_y = 30, 0
+    fig_x, fig_y = 50, 0
 
     fig_photo_mean = draw_figure(canvasMean, fig2, loc=(fig_x, fig_y))
 
     
     fig3 = plt.figure(4)
-    plt.bar(timeVeh, maxMeasure,  width=0.1,  color=['red'])
+    plt.stem(timeVeh, maxMeasure,  use_line_collection=True)
 
     plt.xlabel('time (h)')
     plt.ylabel("Maximum "+measure)
-    # plt_mean.grid(True)
+    plt.grid(True)
 
 
     global fig_photo_max
     global canvasMax
-    fig_x, fig_y = 30, 0
+    fig_x, fig_y = 50, 0
 
     fig_photo_max = draw_figure(canvasMax, fig3, loc=(fig_x, fig_y))
 
 
     #vehicles
-    fig1 = plt.figure(2)
-    plt.bar(timeVeh, vehicles,  width=0.1,  color=['red'])
+    fig1 = plt.figure(6)
+    plt.stem(timeVeh, vehicles,  use_line_collection=True)
     # print(vehicles, timeVeh)
 
     plt.xlabel('time (h)')
     plt.ylabel("Number of vehicles")
-    # plt_veh.grid(True)
+    plt.grid(True)
 
     # Keep this handle alive, or else figure will disappear
     global fig_photo_veh
     global canvasVehicles
-    fig_x, fig_y = 30, 0
+    fig_x, fig_y = 50, 0
 
     fig_photo_veh = draw_figure(canvasVehicles, fig1, loc=(fig_x, fig_y))
-    
+
+
+    global fig_photo_scat
+    global canvasScatterPlot
+    fig_x, fig_y = 50, 0
+
+    fig4 = plt.figure(5)
+
+    df = pd.DataFrame( mydata[0], mydata[1])
+
+    # plt.plot( 'x', 'y', data=df, linestyle='none', marker='o', markersize=0.7, alpha=0.5, color="purple")
+    plt.plot(mydata[0], mydata[1], 'ko',  markersize=4, alpha=0.5, color='purple')
+    plt.xlabel('time (h)')
+    plt.ylabel(measure)
+    plt.grid(True)
+
+    fig_photo_scat = draw_figure(canvasScatterPlot, fig4, loc=(fig_x, fig_y))
+
+
+def hexbin(mydata, measure):
+
+    x = mydata[0]
+    y = mydata[1]
+
+    xmin = x.min()
+    xmax = x.max()
+    ymin = y.min()
+    ymax = y.max()
+
+    global canvasLog
+    global color
+    global fig_photo_log 
+
+    fig = plt.figure(2)
+    hb = plt.hexbin(x, y, bins='log', gridsize=30, cmap=get_color(color.get()))
+    plt.axis([xmin, xmax, ymin, ymax])
+    plt.xlabel('time (h)')
+    if "pagerank" not in measure:
+        plt.ylabel(measure+" centrality")
+    else:
+        plt.ylabel(measure)
+    cb = plt.colorbar(hb)
+    cb.set_label('log10(N)')
+    plt.grid(True)
+
+    fig_x, fig_y = 50, 0
+
+    fig_photo_log = draw_figure(canvasLog, fig, loc=(fig_x, fig_y))
 
 def saveFigure():
 
     global tabControl
     global plt
     tab_index = tabControl.index(tabControl.select())
-    print("teste")
+
     plt.figure(tab_index+1)
     f = tkFileDialog.asksaveasfilename(defaultextension=".png")
     if f is None:  # asksaveasfilename return `None` if dialog closed with "cancel".
@@ -231,39 +300,59 @@ def preparing_data(measure):
     print(start, " ", end, " ", interval)
     # time = 9000000./1000./60.
 
-    for row in c.execute("select cast(time as integer) as time,"+measure+" from graphs where time between "+str(start)+" and "+str(end)):
-        time = row[0]
+    # :(
+    m = measure
+    if "betweenness" in measure:
+        m = "betweeness"
+    elif "local" in measure:
+        m = "local_efficiency"
+    elif "global" in measure:
+        m = "global_efficiency"
+    elif "maximal" in measure:
+        m = "maximal_matching"
+    elif "harmonic" in measure:
+        m = "harmonic_centrality"
+    print(m)
+    it = float(interval.get()) * 1000. * 60.
+    for row in c.execute("select cast(time as integer) as time,"+m+" from graphs where time between "+str(start)+" and "+str(end)):
+     
+        time = float(row[0])
         veh = 0
         d = literal_eval(row[1])
         sum = 0.
-        maxValue = 0
+        maxValue = 0.
+        t = float(time)
+        print(d)
         for key, value in d.items():
-            t = float(time)/1000./60./60.
-            # print((t * 60.)," ",float(interval.get()))
-            if (t * 60.) % float(interval.get()):
-                x.append(t)
+            if t  % it == 0:
+                x.append(t/1000./60./60.)
                 y.append(float(value))
                 veh = veh + 1
                 sum += float(value)
                 if maxValue < float(value):
                     maxValue = float(value)
-        if (t * 60.) % float(interval.get()):
-            timeVeh.append(float(time)/1000./60./60.)
+        if t % it == 0:
+
+            timeVeh.append(t/1000./60./60.)
             vehicles.append(veh)
             m = float(sum)/float(veh)
             mean.append(m)
             maxMeasure.append(maxValue)
-    print(vehicles)
     if len(x) >= 1:
         return [np.array(x), np.array(y)]
     return None
 
 def obtainMeasure():
 
+   
     global endTime, startTime
-    if int(endTime.get()) < int(startTime.get()): 
+    global interval
+
+    conv = float(interval.get())/60.
+    print(conv," ",endTime.get()," ",startTime.get())
+    if float(endTime.get()) < float(startTime.get()): 
         errorMessage.showerror("Error", "Start time must be before the end time")
-    elif (int(interval.get())/60) >= int(endTime.get()) or (int(interval.get())/60.) >= int(startTime.get()):
+    elif conv >= float(endTime.get()) or conv > (float(endTime.get()) - float(startTime.get())):
         errorMessage.showerror("Error", "Interval must be lower than start/end time")
     else:
 
@@ -277,7 +366,7 @@ def obtainMeasure():
         global canvasVehicles
         canvasVehicles.delete("all")
         global fig_photo_veh
-        plt.close(2)
+        plt.close(6)
         fig_photo_veh = None
 
         global canvasMax
@@ -292,15 +381,23 @@ def obtainMeasure():
         plt.close(3)
         fig_photo_mean = None
 
-        global vehicles
-        vehicles = None
+        global canvasScatterPlot
+        canvasScatterPlot.delete("all")
+        global fig_photo_scat
+        plt.close(5)
+        fig_photo_scat = None
+
+        global canvasLog
+        canvasLog.delete("all")
+        global fig_photo_log
+        plt.close(2)
+        fig_photo_log = None
 
         global currentMeasure
         density_plot(preparing_data(currentMeasure.get()), currentMeasure.get())
 
-        
-
 def window_frame():
+
     window = Tk()
     window.style = Style()
     window.style.theme_use("clam")
@@ -344,7 +441,7 @@ def window_frame():
 
     global interval #minutes
     interval = Combobox(window)
-    interval['values'] = ("5", "10", "15", "30", "60", "120")
+    interval['values'] = ("1", "5", "10", "15", "30", "60", "120")
     interval.current(1)
     interval.place(bordermode=OUTSIDE, height=30, width=200, x=30, y=200)
 
@@ -383,20 +480,24 @@ def window_frame():
     tab2 = ttk.Frame(tabControl)
     tab3 = ttk.Frame(tabControl)
     tab4 = ttk.Frame(tabControl)
+    tab5 = ttk.Frame(tabControl)
+    tab6 = ttk.Frame(tabControl)
 
-    tabControl.add(tab1, text='gvr')      # Add the tab
-    tabControl.add(tab2, text='vehicles')      # Add the tab
-    tabControl.add(tab3, text='mean')      # Add the tab
-    tabControl.add(tab4, text='max')      # Add the tab
+    tabControl.add(tab1, text='gvr')     
+    tabControl.add(tab2, text='gvr-log')     
+    tabControl.add(tab3, text='mean')     
+    tabControl.add(tab4, text='max')      
+    tabControl.add(tab5, text='scatter')     
+    tabControl.add(tab6, text='vehicles')
     tabControl.place(x=280, y=30)  # Pack to make visible
 
     global canvas 
     canvas = Canvas(tab1, background="white", width=w, height=h)
     canvas.place(x=0, y=0)
 
-    global canvasVehicles 
-    canvasVehicles = Canvas(tab2, background="white", width=w, height=h)
-    canvasVehicles.place(x=0, y=0)
+    global canvasLog
+    canvasLog = Canvas(tab2, background="white", width=w, height=h)
+    canvasLog.place(x=0, y=0)
 
     global canvasMean
     canvasMean = Canvas(tab3, background="white", width=w, height=h)
@@ -406,11 +507,14 @@ def window_frame():
     canvasMax = Canvas(tab4, background="white", width=w, height=h)
     canvasMax.place(x=0, y=0)
 
-    # photos = ["1.png","2.png"]
-    # def slideShow():
-    #     img = next(photos)
-    #     displayCanvas.config(image=img)
-    #     root.after(50, slideShow) # 0.05 seconds
+    global canvasScatterPlot
+    canvasScatterPlot = Canvas(tab5, background="white", width=w, height=h)
+    canvasScatterPlot.place(x=0, y=0)
+
+    global canvasVehicles 
+    canvasVehicles = Canvas(tab6, background="white", width=w, height=h)
+    canvasVehicles.place(x=0, y=0)
+  
     saveHistogram = Button(master=window, text='save', command=saveFigure)
     saveHistogram.place(bordermode=OUTSIDE, height=30, width=80, x=150, y=475)
 
