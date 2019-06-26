@@ -22,8 +22,8 @@ python graph.py
 
 python3 interface.py
 
-![Interface]![Interface](Selection_126.png)
+![Interface](Selection_126.png)
 
 ### Output:
 
-![Interface]![Interface](Selection_128.png)
+![Interface](Selection_128.png)
