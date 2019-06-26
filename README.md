@@ -12,11 +12,11 @@ You can download it in this link http://kolntrace.project.citi-lab.fr/
 
 ### Colecting data:
 
-python runner.py <cologne6to8>.sumocfg <tripinfo>.xml
+`python runner.py <cologne6to8>.sumocfg <tripinfo>.xml`
 
 ### Complex network measures:
 
-python graph.py
+`python graph.py`
 
 #### List of measures available:
 
@@ -29,7 +29,7 @@ python graph.py
 
 ### Interface:
 
-python3 interface.py
+`python3 interface.py`
 
 ![Interface](Selection_126.png)
 
