@@ -1,4 +1,4 @@
-# Graph Visual Rhythm
+# Graph Visual Rhythm for Vehicular Networks 
 
 ### Dependencies:
 
@@ -17,6 +17,15 @@ python runner.py <cologne6to8>.sumocfg <tripinfo>.xml
 ### Complex network measures:
 
 python graph.py
+
+#### List of measures available:
+
+- Degree centrality
+- Closeness centrality
+- Betweenness centrality
+- Local efficiency
+- Harmonic centrality
+- PageRank
 
 ### Interface:
 
