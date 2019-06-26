@@ -2,12 +2,12 @@
 
 ### Dependencies:
 
-Before the execution, you need to check these following dependencies: SUMO 1.2, python, python3, networkx, and matplotlib.
+Before the execution, you need to check these following dependencies: SUMO 1.2, python, python3, networkx, and matplotlib 2.1.0, seaborn.
 
 
 ### Dataset:
 
-TAPAS Cologne is used.
+TAPASCologne is used.
 You can download it in this link http://kolntrace.project.citi-lab.fr/ 
 
 ### Colecting data:
@@ -22,4 +22,8 @@ python graph.py
 
 python3 interface.py
 
-![Interface](Selection_117.png)
+![Interface]![Interface](Selection_126.png)
+
+### Output:
+
+![Interface]![Interface](Selection_128.png)
