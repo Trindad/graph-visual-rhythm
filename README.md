@@ -10,7 +10,7 @@ Before the execution, you need to check these following dependencies: SUMO 1.2, 
 TAPASCologne is used.
 You can download it in this link http://kolntrace.project.citi-lab.fr/ 
 
-![Interface](Selection_126.png)
+![Interface](Selection_127.png)
 
 ### Colecting data:
 
